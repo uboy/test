@@ -1,23 +1,23 @@
-    /************tcpserver.c************************/
-    /* header files needed to use the sockets API */
-    /* File contain Macro, Data Type and Structure */
-    /***********************************************/
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include <sys/time.h>
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <errno.h>
-    #include <unistd.h>
-    /* BufferLength is 100 bytes */
-    #define BufferLength 100
-    /* Server port number */
-    #define SERVPORT 3111
-     
-    int main()
-    {
+/************tcpserver.c************************/
+/* header files needed to use the sockets API */
+/* File contain Macro, Data Type and Structure */
+/***********************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <unistd.h>
+/* BufferLength is 100 bytes */
+#define BufferLength 100
+/* Server port number */
+#define SERVPORT 3111
+ 
+int main()
+{
     /* Variable and structure definitions. */
     int sd, sd2, rc, length = sizeof(int);
     int totalcnt = 0, on = 1;
@@ -40,13 +40,14 @@
     /* Get a socket descriptor */
     if((sd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-    perror("Server-socket() error");
-    /* Just exit */
-    exit (-1);
+        perror("Server-socket() error");
+        /* Just exit */
+        exit (-1);
     }
     else
-    printf("Server-socket() is OK\n");
-     
+    {
+        printf("Server-socket() is OK\n");
+    } 
     /* The setsockopt() function is used to allow */
     /* the local address to be reused when the server */
     /* is restarted before the required wait time */
@@ -55,20 +56,22 @@
     /* Allow socket descriptor to be reusable */
     if((rc = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on))) < 0)
     {
-    perror("Server-setsockopt() error");
-    close(sd);
-    exit (-1);
+        perror("Server-setsockopt() error");
+        close(sd);
+        exit (-1);
     }
     else
-    printf("Server-setsockopt() is OK\n");
-     
+    {
+        printf("Server-setsockopt() is OK\n");
+    } 
     /* bind to an address */
     memset(&serveraddr, 0x00, sizeof(struct sockaddr_in));
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(SERVPORT);
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-     
-    printf("Using %s, listening at %d\n", inet_ntoa(serveraddr.sin_addr), SERVPORT);
+    char str[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &serveraddr.sin_addr, str, INET_ADDRSTRLEN);
+    printf("Using %s, listening at %d\n", str, SERVPORT);
      
     /* After the socket descriptor is created, a bind() */
     /* function gets a unique name for the socket. */
@@ -77,15 +80,16 @@
     /* connect to any client that used port 3005. */
     if((rc = bind(sd, (struct sockaddr *)&serveraddr, sizeof(serveraddr))) < 0)
     {
-    perror("Server-bind() error");
-    /* Close the socket descriptor */
-    close(sd);
-    /* and just exit */
-    exit(-1);
+        perror("Server-bind() error");
+        /* Close the socket descriptor */
+        close(sd);
+        /* and just exit */
+        exit(-1);
     }
     else
+    {
         printf("Server-bind() is OK\n");
-     
+    } 
     /* The listen() function allows the server to accept */
     /* incoming client connections. In this example, */
     /* the backlog is set to 10. This means that the */
@@ -100,8 +104,9 @@
         exit (-1);
     }
     else
+    {
         printf("Server-Ready for client connection...\n");
-     
+    } 
     /* The server will accept a connection request */
     /* with this accept() function, provided the */
     /* connection request does the following: */
@@ -118,11 +123,14 @@
         exit (-1);
     }
     else
+    {
         printf("Server-accept() is OK\n");
-     
+    } 
     /*client IP*/
     printf("Server-new socket, sd2 is OK...\n");
-    printf("Got connection from the client: %s\n", inet_ntop(their_addr.sin_addr);
+    inet_ntop(AF_INET, &serveraddr.sin_addr, str, INET_ADDRSTRLEN);
+
+    printf("Got connection from the client: %s\n", str);
      
     /* The select() function allows the process to */
     /* wait for an event to occur and to wake up */
@@ -137,39 +145,38 @@
     rc = select(sd2+1, &read_fd, NULL, NULL, &timeout);
     if((rc == 1) && (FD_ISSET(sd2, &read_fd)))
     {
-    /* Read data from the client. */
-    totalcnt = 0;
+        /* Read data from the client. */
+        totalcnt = 0;
      
-    while(totalcnt < BufferLength)
-    {
-    /* When select() indicates that there is data */
-    /* available, use the read() function to read */
-    /* 100 bytes of the string that the */
-    /* client sent. */
-    /***********************************************/
-    /* read() from client */
-    rc = read(sd2, &buffer[totalcnt], (BufferLength - totalcnt));
-    if(rc < 0)
-    {
-        perror("Server-read() error");
-        close(sd);
-        close(sd2);
-        exit (-1);
-    }
-    else if (rc == 0)
-    {
-        printf("Client program has issued a close()\n");
-        close(sd);
-        close(sd2);
-        exit(-1);
-    }
-    else
-    {
-        totalcnt += rc;
-        printf("Server-read() is OK\n");
-    }
-     
-    }
+        while(totalcnt < BufferLength)
+        {
+            /* When select() indicates that there is data */
+            /* available, use the read() function to read */
+            /* 100 bytes of the string that the */
+            /* client sent. */
+            /***********************************************/
+            /* read() from client */
+            rc = read(sd2, &buffer[totalcnt], (BufferLength - totalcnt));
+            if(rc < 0)
+            {
+                perror("Server-read() error");
+                close(sd);
+                close(sd2);
+                exit (-1);
+            }
+            else if (rc == 0)
+            {
+                printf("Client program has issued a close()\n");
+                close(sd);
+                close(sd2);
+                exit(-1);
+            }
+            else
+            {
+                totalcnt += rc;
+                printf("Server-read() is OK\n");
+            }
+        }
     }
     else if (rc < 0)
     {
@@ -200,22 +207,23 @@
     rc = write(sd2, buffer, totalcnt);
     if(rc != totalcnt)
     {
-    perror("Server-write() error");
-    /* Get the error number. */
-    rc = getsockopt(sd2, SOL_SOCKET, SO_ERROR, &temp, &length);
-    if(rc == 0)
-    {
-        /* Print out the asynchronously */
-        /* received error. */
-        errno = temp;
-        perror("SO_ERROR was: ");
-    }
-    else
-        printf("Server-write() is OK\n");
-     
-    close(sd);
-    close(sd2);
-    exit(-1);
+        perror("Server-write() error");
+        /* Get the error number. */
+        rc = getsockopt(sd2, SOL_SOCKET, SO_ERROR, &temp, &length);
+        if(rc == 0)
+        {
+            /* Print out the asynchronously */
+            /* received error. */
+            errno = temp;
+            perror("SO_ERROR was: ");
+        }
+        else
+        {
+            printf("Server-write() is OK\n");
+        } 
+        close(sd);
+        close(sd2);
+        exit(-1);
     }
      
     /* When the data has been sent, close() */
@@ -230,4 +238,4 @@
     close(sd);
     exit(0);
     return 0;
-    }
+}
